@@ -57,14 +57,18 @@ exports.updatePost = async (req, res) => {
 
 exports.deletePost = async (req, res) => {
   try {
-    const post = await Post.findById(req.params.id);
-    if (!post) return res.status(404).json({ message: 'Post not found' });
-    if (post.author.toString() !== req.user._id.toString()) return res.status(403).json({ message: 'Forbidden' });
+    const deletedPost = await Post.findOneAndDelete({
+      _id: req.params.id,
+      author: req.user._id
+    });
+    if (!deletedPost) return res.status(404).json({ message: 'Post not found or forbidden' });
 
-    await post.remove();
     res.json({ message: 'Post removed' });
-  } catch (err) { res.status(500).json({ message: err.message }); }
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
 };
+
 
 exports.toggleLike = async (req, res) => {
   try {
