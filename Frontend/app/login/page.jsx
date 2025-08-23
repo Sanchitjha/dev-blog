@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
@@ -14,39 +14,54 @@ import { Input } from "@/components/ui/input";
 import ParticleBackground from "@/components/particle-background";
 import Link from "next/link";
 import axios from "axios";
+import Loading from "@/components/loading";
 
-function LoginContent() {
-  const router = useRouter();
-  const [password, setPassword] = useState("");
+function AuthContent() {
+  const [mode, setMode] = useState("login");
   const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [name, setName] = useState(""); // only for signup
   const [errorHandler, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const toggleMode = () => {
+    setMode(mode === "login" ? "signup" : "login");
+    setError("");
+  };
 
   async function handleSubmit(e) {
-    e.preventDefault(); // prevent form default submission
-    try {
-      const response = await axios.post(
-        "http://localhost:5000/api/auth/login",
-        {
-          email,
-          password,
-        }
-      );
+    e.preventDefault();
+    setLoading(true); // start loading
+    setError(""); // reset error
 
-      // axios automatically returns data
+    try {
+      const endpoint =
+        mode === "login"
+          ? "http://localhost:5000/api/auth/login"
+          : "http://localhost:5000/api/auth/register";
+
+      const payload =
+        mode === "login" ? { email, password } : { name, email, password };
+
+      const response = await axios.post(endpoint, payload);
+
       const data = response.data;
 
       if (response.status === 200) {
+        if (mode === "login") {
+          localStorage.setItem("token", data.token);
+        }
         router.push("/");
       } else {
-        setError(data.message || "Invalid login credentials");
+        setError(data.message || "Something went wrong");
       }
     } catch (err) {
-      // Handle errors (network errors or server errors)
       const message =
         err.response?.data?.message || err.message || "Something went wrong";
-      console.log(message);
-
       setError(message);
+      console.log(message);
+    } finally {
+      setLoading(false); // stop loading
     }
   }
 
@@ -63,13 +78,33 @@ function LoginContent() {
       <div className="flex min-h-screen items-center justify-center px-4">
         <Card className="w-full max-w-md backdrop-blur bg-white/90">
           <CardHeader>
-            <CardTitle>Welcome back</CardTitle>
+            <CardTitle>
+              {mode === "login" ? "Welcome back" : "Create an account"}
+            </CardTitle>
             <CardDescription>
-              Login to start creating and managing your posts.
+              {mode === "login"
+                ? "Login to start creating and managing your posts."
+                : "Sign up to start creating and managing your posts."}
             </CardDescription>
           </CardHeader>
           <CardContent>
             <form className="grid gap-4" onSubmit={handleSubmit}>
+              {mode === "signup" && (
+                <div className="grid gap-2">
+                  <label htmlFor="name" className="text-sm font-medium">
+                    Name
+                  </label>
+                  <Input
+                    id="name"
+                    type="text"
+                    placeholder="Jane Doe"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    required
+                  />
+                </div>
+              )}
+
               <div className="grid gap-2">
                 <label htmlFor="email" className="text-sm font-medium">
                   Email
@@ -83,6 +118,7 @@ function LoginContent() {
                   required
                 />
               </div>
+
               <div className="grid gap-2">
                 <label htmlFor="password" className="text-sm font-medium">
                   Password
@@ -96,15 +132,34 @@ function LoginContent() {
                   required
                 />
               </div>
+
               <Button
                 type="submit"
                 className="bg-emerald-600 hover:bg-emerald-700"
               >
-                Continue
+                {loading
+                  ? "Loading..."
+                  : mode === "login"
+                  ? "Login"
+                  : "Sign Up"}
               </Button>
+
               {errorHandler && (
                 <p className="text-xs text-red-600">{errorHandler}</p>
               )}
+
+              <p className="text-center text-sm text-gray-600">
+                {mode === "login"
+                  ? "Don't have an account?"
+                  : "Already have an account?"}{" "}
+                <button
+                  type="button"
+                  className="text-emerald-600 font-medium underline"
+                  onClick={toggleMode}
+                >
+                  {mode === "login" ? "Sign Up" : "Login"}
+                </button>
+              </p>
             </form>
           </CardContent>
         </Card>
@@ -114,5 +169,5 @@ function LoginContent() {
 }
 
 export default function LoginPage() {
-  return <LoginContent />;
+  return <AuthContent />;
 }
