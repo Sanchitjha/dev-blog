@@ -23,6 +23,7 @@ function AuthContent() {
   const [name, setName] = useState(""); // only for signup
   const [errorHandler, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const router = useRouter();
 
   const toggleMode = () => {
     setMode(mode === "login" ? "signup" : "login");
@@ -50,6 +51,7 @@ function AuthContent() {
       if (response.status === 200) {
         if (mode === "login") {
           localStorage.setItem("token", data.token);
+          localStorage.setItem("name", data.name);
         }
         router.push("/");
       } else {

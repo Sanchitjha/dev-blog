@@ -1,29 +1,34 @@
-"use client"
+"use client";
 
-import { useEffect, useState } from "react"
-import ParticleBackground from "@/components/particle-background"
-import { AuthProvider, useAuth } from "@/components/auth-context"
-import SiteHeader from "@/components/site-header"
-import BlogCard from "@/components/blog-card"
-import { Button } from "@/components/ui/button"
-import { useToast } from "@/hooks/use-toast"
-import { deletePost, ensureSeed, getPosts } from "@/lib/storage"
-
+import { useEffect, useState } from "react";
+import ParticleBackground from "@/components/particle-background";
+import SiteHeader from "@/components/site-header";
+import BlogCard from "@/components/blog-card";
+import { Button } from "@/components/ui/button";
+import { useToast } from "@/hooks/use-toast";
+import axios from "axios";
 function HomeContent() {
-  const { user } = useAuth()
-  const { toast } = useToast()
-  const [posts, setPosts] = useState([])
+  const { toast } = useToast();
+  const [posts, setPosts] = useState([]);
 
   useEffect(() => {
-    ensureSeed()
-    setPosts(getPosts())
-  }, [])
+    getPosts();
+  }, []);
 
+  const getPosts = async () => {
+    try {
+      const response = await axios.get("http://localhost:5000/api/posts/");
+      setPosts(response.data);
+    } catch (error) {
+      console.error("Error fetching posts:", error);
+      return [];
+    }
+  };
   const handleDelete = (id) => {
-    const filtered = deletePost(id)
-    setPosts(filtered)
-    toast({ title: "Post deleted", description: "The post was removed." })
-  }
+    const filtered = deletePost(id);
+    setPosts(filtered);
+    toast({ title: "Post deleted", description: "The post was removed." });
+  };
 
   return (
     <div className="relative min-h-screen">
@@ -34,12 +39,15 @@ function HomeContent() {
       <main className="mx-auto max-w-6xl px-4 py-10">
         <section className="relative overflow-hidden rounded-2xl border bg-gradient-to-br from-emerald-50 to-white p-8">
           <div className="max-w-2xl">
-            <h1 className="text-3xl font-semibold tracking-tight">A modern, minimal blog</h1>
+            <h1 className="text-3xl font-semibold tracking-tight">
+              A modern, minimal blog
+            </h1>
             <p className="mt-2 text-muted-foreground">
-              Write, publish, and explore. Thoughtful UI with micro-particles for a calm vibe.
+              Write, publish, and explore. Thoughtful UI with micro-particles
+              for a calm vibe.
             </p>
           </div>
-          {!user ? (
+          {!localStorage.getItem("token") ? (
             <div className="mt-6">
               <Button asChild className="bg-emerald-600 hover:bg-emerald-700">
                 <a href="/login">Login to start writing</a>
@@ -56,15 +64,13 @@ function HomeContent() {
             ) : (
               posts.map((p) => (
                 <BlogCard
-                  key={p.id}
-                  id={p.id}
+                  key={p._id}
+                  id={p._id}
                   title={p.title}
                   content={p.content}
                   author={p.author}
                   date={p.date}
                   tags={p.tags}
-                  canDelete={!!user && user.email === p.author?.email}
-                  onDelete={handleDelete}
                 />
               ))
             )}
@@ -72,13 +78,9 @@ function HomeContent() {
         </section>
       </main>
     </div>
-  )
+  );
 }
 
 export default function Page() {
-  return (
-    <AuthProvider>
-      <HomeContent />
-    </AuthProvider>
-  )
+  return <HomeContent />;
 }
