@@ -1,46 +1,57 @@
-"use client"
+"use client";
 
-import { useEffect, useMemo, useState } from "react"
-import { useRouter } from "next/navigation"
-import { AuthProvider, useAuth } from "@/components/auth-context"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
-import ParticleBackground from "@/components/particle-background"
-import { useToast } from "@/hooks/use-toast"
-import { addPost } from "@/lib/storage"
-import Link from "next/link"
+import { useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import ParticleBackground from "@/components/particle-background";
+import { useToast } from "@/hooks/use-toast";
+import Link from "next/link";
+import axios from "axios";
 
 function CreatePostContent() {
-  const router = useRouter()
-  const { toast } = useToast()
-  const { user, ready } = useAuth()
+  const router = useRouter();
+  const { toast } = useToast();
 
-  const [title, setTitle] = useState("")
-  const [content, setContent] = useState("")
-  const [tags, setTags] = useState("")
+  const [title, setTitle] = useState("");
+  const [content, setContent] = useState("");
+  const [tags, setTags] = useState("");
 
-  useEffect(() => {
-    if (!ready) return
-    if (!user) router.replace("/login")
-  }, [ready, user, router])
-
-  const canPost = useMemo(() => {
-    return user && title.trim().length > 2 && content.trim().length > 10
-  }, [user, title, content])
-
-  function handlePublish(e) {
-    e.preventDefault()
-    if (!canPost) return
+  async function handlePublish(e) {
+    e.preventDefault();
     const tagList = tags
       .split(",")
       .map((t) => t.trim())
       .filter(Boolean)
-      .slice(0, 5)
-    addPost({ title: title.trim(), content: content.trim(), tags: tagList, author: user })
-    toast({ title: "Post published", description: "Your post is live." })
-    router.push("/")
+      .slice(0, 5);
+    console.log({ title, content, tags: tagList });
+    const response = await axios.post(
+      "http://localhost:5000/api/posts/",
+      {
+        title,
+        content,
+        tags: tagList,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      }
+    );
+    if (response.status !== 201) {
+      toast({ title: "Error", description: "Failed to publish post." });
+      return;
+    }
+    toast({ title: "Post published", description: "Your post is live." });
+    router.push("/");
   }
 
   return (
@@ -57,7 +68,9 @@ function CreatePostContent() {
         <Card className="w-full max-w-2xl backdrop-blur bg-white/90">
           <CardHeader>
             <CardTitle>Create a new post</CardTitle>
-            <CardDescription>Compose your thoughts and publish when you are ready.</CardDescription>
+            <CardDescription>
+              Compose your thoughts and publish when you are ready.
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <form className="grid gap-4" onSubmit={handlePublish}>
@@ -101,10 +114,17 @@ function CreatePostContent() {
                 />
               </div>
               <div className="flex items-center gap-3">
-                <Button type="submit" disabled={!canPost} className="bg-emerald-600 hover:bg-emerald-700">
+                <Button
+                  type="submit"
+                  className="bg-emerald-600 hover:bg-emerald-700"
+                >
                   Publish
                 </Button>
-                <Button type="button" variant="ghost" onClick={() => router.push("/")}>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  onClick={() => router.push("/")}
+                >
                   Cancel
                 </Button>
               </div>
@@ -113,13 +133,9 @@ function CreatePostContent() {
         </Card>
       </div>
     </div>
-  )
+  );
 }
 
 export default function CreatePostPage() {
-  return (
-    <AuthProvider>
-      <CreatePostContent />
-    </AuthProvider>
-  )
+  return <CreatePostContent />;
 }

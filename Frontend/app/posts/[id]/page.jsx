@@ -1,21 +1,28 @@
-"use client"
+"use client";
 
-import { useEffect, useState } from "react"
-import { useParams, useRouter } from "next/navigation"
-import { getPostById } from "@/lib/storage"
-import { Button } from "@/components/ui/button"
-import ParticleBackground from "@/components/particle-background"
-import Link from "next/link"
+import { useEffect, useState } from "react";
+import { useParams, useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import ParticleBackground from "@/components/particle-background";
+import Link from "next/link";
 
 export default function PostPage() {
-  const params = useParams()
-  const router = useRouter()
-  const [post, setPost] = useState(null)
+  const params = useParams();
+  const router = useRouter();
+  const [post, setPost] = useState(null);
 
   useEffect(() => {
-    if (!params?.id) return
-    setPost(getPostById(params.id))
-  }, [params?.id])
+    if (!params?.id) return;
+    console.log("Fetching post with ID:", params.id);
+    const getpost = async () => {
+      const response = await fetch(
+        `http://localhost:5000/api/posts/${params.id}`
+      );
+      const data = await response.json();
+      setPost(data);
+    };
+    getpost();
+  }, [params?.id]);
 
   if (!post) {
     return (
@@ -27,18 +34,20 @@ export default function PostPage() {
           </Button>
           <div className="mt-10 rounded-lg border bg-white/90 p-6">
             <h1 className="text-2xl font-semibold">Post not found</h1>
-            <p className="mt-2 text-muted-foreground">It may have been deleted.</p>
+            <p className="mt-2 text-muted-foreground">
+              It may have been deleted.
+            </p>
           </div>
         </div>
       </div>
-    )
+    );
   }
 
   const prettyDate = new Date(post.date).toLocaleDateString(undefined, {
     year: "numeric",
     month: "short",
     day: "numeric",
-  })
+  });
 
   return (
     <div className="relative min-h-screen">
@@ -49,7 +58,9 @@ export default function PostPage() {
         </Button>
         <article className="mt-6 rounded-2xl border bg-white/90 p-6 md:p-10">
           <header className="mb-6">
-            <h1 className="text-3xl font-semibold tracking-tight">{post.title}</h1>
+            <h1 className="text-3xl font-semibold tracking-tight">
+              {post.title}
+            </h1>
             <p className="mt-2 text-sm text-muted-foreground">
               by {post.author?.name || "Unknown"} • {prettyDate}
             </p>
@@ -64,9 +75,11 @@ export default function PostPage() {
               ))}
             </div>
           </header>
-          <div className="prose max-w-none text-[15px] leading-7 text-neutral-700">{post.content}</div>
+          <div className="prose max-w-none text-[15px] leading-7 text-neutral-700">
+            {post.content}
+          </div>
         </article>
       </div>
     </div>
-  )
+  );
 }

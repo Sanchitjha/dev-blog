@@ -1,43 +1,55 @@
-"use client"
+"use client";
 
-import { useEffect, useState } from "react"
-import { useRouter } from "next/navigation"
-import { AuthProvider, useAuth } from "@/components/auth-context"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import ParticleBackground from "@/components/particle-background"
-import { useToast } from "@/hooks/use-toast"
-import Link from "next/link"
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import ParticleBackground from "@/components/particle-background";
+import { useToast } from "@/hooks/use-toast";
+import Link from "next/link";
 
 function ProfileContent() {
-  const router = useRouter()
-  const { toast } = useToast()
-  const { user, ready, updateUser } = useAuth()
+  const router = useRouter();
+  const { toast } = useToast();
 
-  const [name, setName] = useState("")
-  const [email, setEmail] = useState("")
-  const [phone, setPhone] = useState("")
-  const [image, setImage] = useState("")
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
+  const [image, setImage] = useState("");
 
   useEffect(() => {
-    if (!ready) return
+    if (!ready) return;
     if (!user) {
-      router.replace("/login")
+      router.replace("/login");
     } else {
-      setName(user.name || "")
-      setEmail(user.email || "")
-      setPhone(user.phone || "")
-      setImage(user.image || "")
+      setName(user.name || "");
+      setEmail(user.email || "");
+      setPhone(user.phone || "");
+      setImage(user.image || "");
     }
-  }, [ready, user, router])
+  }, [ready, user, router]);
 
   function onSave(e) {
-    e.preventDefault()
-    updateUser({ name: name.trim(), email: email.trim(), phone: phone.trim(), image: image.trim() })
-    toast({ title: "Profile updated", description: "Your profile has been saved." })
+    e.preventDefault();
+    updateUser({
+      name: name.trim(),
+      email: email.trim(),
+      phone: phone.trim(),
+      image: image.trim(),
+    });
+    toast({
+      title: "Profile updated",
+      description: "Your profile has been saved.",
+    });
   }
 
   const initials =
@@ -45,7 +57,7 @@ function ProfileContent() {
       .split(" ")
       .map((s) => s[0]?.toUpperCase())
       .slice(0, 2)
-      .join("") || "U"
+      .join("") || "U";
 
   return (
     <div className="relative min-h-screen">
@@ -61,7 +73,9 @@ function ProfileContent() {
         <Card className="w-full max-w-2xl backdrop-blur bg-white/90">
           <CardHeader>
             <CardTitle>Profile</CardTitle>
-            <CardDescription>Update your personal information and profile photo.</CardDescription>
+            <CardDescription>
+              Update your personal information and profile photo.
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <form className="grid gap-5" onSubmit={onSave}>
@@ -79,7 +93,11 @@ function ProfileContent() {
                     onChange={(e) => setImage(e.target.value)}
                   />
                   <div className="flex gap-2">
-                    <Button type="button" variant="ghost" onClick={() => setImage("")}>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      onClick={() => setImage("")}
+                    >
                       Remove photo
                     </Button>
                   </div>
@@ -121,10 +139,17 @@ function ProfileContent() {
               </div>
 
               <div className="flex items-center gap-3">
-                <Button type="submit" className="bg-emerald-600 hover:bg-emerald-700">
+                <Button
+                  type="submit"
+                  className="bg-emerald-600 hover:bg-emerald-700"
+                >
                   Save changes
                 </Button>
-                <Button type="button" variant="outline" onClick={() => router.push("/")}>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => router.push("/")}
+                >
                   Cancel
                 </Button>
               </div>
@@ -133,7 +158,7 @@ function ProfileContent() {
         </Card>
       </div>
     </div>
-  )
+  );
 }
 
 export default function ProfilePage() {
@@ -141,5 +166,5 @@ export default function ProfilePage() {
     <AuthProvider>
       <ProfileContent />
     </AuthProvider>
-  )
+  );
 }
