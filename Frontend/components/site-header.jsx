@@ -13,12 +13,21 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useEffect, useState } from "react";
 
 export default function SiteHeader() {
   const pathname = usePathname();
   const router = useRouter();
-  const initials = localStorage.getItem("user");
-  const token = localStorage.getItem("token");
+
+  const [token, setToken] = useState(null);
+  const [initials, setInitials] = useState(null);
+
+  useEffect(() => {
+    const storedToken = localStorage.getItem("token");
+    const user = localStorage.getItem("user");
+    setToken(storedToken);
+    setInitials(user ? user.charAt(0) : "");
+  }, []);
 
   const isActive = (href) =>
     pathname === href ? "text-foreground" : "text-muted-foreground";

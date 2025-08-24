@@ -14,7 +14,6 @@ import { Input } from "@/components/ui/input";
 import ParticleBackground from "@/components/particle-background";
 import Link from "next/link";
 import axios from "axios";
-import Loading from "@/components/loading";
 
 function AuthContent() {
   const [mode, setMode] = useState("login");

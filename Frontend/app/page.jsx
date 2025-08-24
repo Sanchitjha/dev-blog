@@ -10,8 +10,11 @@ import axios from "axios";
 function HomeContent() {
   const { toast } = useToast();
   const [posts, setPosts] = useState([]);
+  const [token, setToken] = useState(null);
 
   useEffect(() => {
+    const storedToken = localStorage.getItem("token");
+    setToken(storedToken);  
     getPosts();
   }, []);
 
@@ -24,12 +27,6 @@ function HomeContent() {
       return [];
     }
   };
-  const handleDelete = (id) => {
-    const filtered = deletePost(id);
-    setPosts(filtered);
-    toast({ title: "Post deleted", description: "The post was removed." });
-  };
-
   return (
     <div className="relative min-h-screen">
       <ParticleBackground className="opacity-90" />
@@ -47,7 +44,7 @@ function HomeContent() {
               for a calm vibe.
             </p>
           </div>
-          {!localStorage.getItem("token") ? (
+          {!token ? (
             <div className="mt-6">
               <Button asChild className="bg-emerald-600 hover:bg-emerald-700">
                 <a href="/login">Login to start writing</a>
