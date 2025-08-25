@@ -15,12 +15,13 @@ export default function PostPage() {
     if (!params?.id) return;
     console.log("Fetching post with ID:", params.id);
     const getpost = async () => {
-      const response = await fetch(
-        `https://dev-blog-pwrn.onrender.com/api/posts/${params.id}`
-      );
-      const data = await response.json();
-      setPost(data);
-    };
+  const response = await fetch(
+    `${process.env.NEXT_PUBLIC_API_URL}/api/posts/${params.id}`
+  );
+  const data = await response.json();
+  setPost(data);
+};
+
     getpost();
   }, [params?.id]);
 
