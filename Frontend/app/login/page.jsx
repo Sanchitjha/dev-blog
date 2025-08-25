@@ -37,8 +37,8 @@ function AuthContent() {
     try {
       const endpoint =
         mode === "login"
-          ? "http://localhost:5000/api/auth/login"
-          : "http://localhost:5000/api/auth/register";
+          ? "https://dev-blog-pwrn.onrender.com/api/auth/login"
+          : "https://dev-blog-pwrn.onrender.com/api/auth/register";
 
       const payload =
         mode === "login" ? { email, password } : { name, email, password };
