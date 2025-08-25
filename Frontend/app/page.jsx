@@ -6,7 +6,7 @@ import SiteHeader from "@/components/site-header";
 import BlogCard from "@/components/blog-card";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import axios from "axios";
+import axios from "";
 function HomeContent() {
   const { toast } = useToast();
   const [posts, setPosts] = useState([]);
