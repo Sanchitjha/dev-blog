@@ -34,7 +34,7 @@ function CreatePostContent() {
       .slice(0, 5);
     console.log({ title, content, tags: tagList });
     const response = await axios.post(
-      "http://localhost:5000/api/posts/",
+      "https://dev-blog-pwrn.onrender.com/api/posts/",
       {
         title,
         content,
