@@ -16,7 +16,7 @@ export default function PostPage() {
     console.log("Fetching post with ID:", params.id);
     const getpost = async () => {
       const response = await fetch(
-        `http://localhost:5000/api/posts/${params.id}`
+        `https://dev-blog-pwrn.onrender.com/api/posts/${params.id}`
       );
       const data = await response.json();
       setPost(data);
