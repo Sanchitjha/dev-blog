@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
@@ -24,34 +24,48 @@ function CreatePostContent() {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [tags, setTags] = useState("");
+  const [loading, setLoading] = useState(false);
 
   async function handlePublish(e) {
     e.preventDefault();
-    const tagList = tags
-      .split(",")
-      .map((t) => t.trim())
-      .filter(Boolean)
-      .slice(0, 5);
-    console.log({ title, content, tags: tagList });
-    const response = await axios.post(
-      "https://dev-blog-pwrn.onrender.com/api/posts/",
-      {
-        title,
-        content,
-        tags: tagList,
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
+    setLoading(true);
+
+    try {
+      const tagList = tags
+        .split(",")
+        .map((t) => t.trim())
+        .filter(Boolean)
+        .slice(0, 5);
+
+      const token = localStorage.getItem("token");
+      if (!token) {
+        toast({ title: "Not logged in", description: "Please log in first." });
+        setLoading(false);
+        return;
       }
-    );
-    if (response.status !== 201) {
-      toast({ title: "Error", description: "Failed to publish post." });
-      return;
+
+      const response = await axios.post(
+        `${process.env.NEXT_PUBLIC_API_URL || "https://dev-blog-pwrn.onrender.com"}/api/posts`,
+        { title, content, tags: tagList },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+
+      if (response.status === 201) {
+        toast({ title: "Post published", description: "Your post is live." });
+        router.push("/");
+      }
+    } catch (error) {
+      console.error(error);
+      toast({
+        title: "Error",
+        description:
+          error.response?.data?.message || "Failed to publish post.",
+      });
+    } finally {
+      setLoading(false);
     }
-    toast({ title: "Post published", description: "Your post is live." });
-    router.push("/");
   }
 
   return (
@@ -117,8 +131,9 @@ function CreatePostContent() {
                 <Button
                   type="submit"
                   className="bg-emerald-600 hover:bg-emerald-700"
+                  disabled={loading}
                 >
-                  Publish
+                  {loading ? "Publishing..." : "Publish"}
                 </Button>
                 <Button
                   type="button"
